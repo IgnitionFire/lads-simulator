@@ -86,8 +86,10 @@ const HARD_PITY         = 70;        // guaranteed 5★ at this pull count
 const HARD_PITY_4       = 10;        // guaranteed 4★+ at this pull count
 const SOFT_PITY_START   = 60;        // soft pity begins here
 const SOFT_PITY_RATE    = 0.085;     // extra rate added per pull in soft pity zone
-const BASE_RATE_5       = 0.01;      // 1% base 5★ rate
-const BASE_RATE_4       = 0.07;      // 7% base 4★ rate
+const DEFAULT_RATE_5    = 2;         // default base 5★ rate, as a whole percent
+const DEFAULT_RATE_4    = 7;         // default base 4★ rate, as a whole percent
+let BASE_RATE_5         = DEFAULT_RATE_5 / 100;  // base 5★ rate (fraction), overridable in Settings
+let BASE_RATE_4         = DEFAULT_RATE_4 / 100;  // base 4★ rate (fraction), overridable in Settings
 // --- AUDIO SFX ---
 let audioCtx = null;
 const sfxBuffers = {};
@@ -221,6 +223,9 @@ function defaultState() {
     // 4★ pity counters (pulls since last 4★ or 5★, resets on 4★+)
     limitedPity4:   0,
     standardPity4:  0,
+    // Base rates (whole percent, e.g. 1 = 1%)
+    baseRate5: DEFAULT_RATE_5,
+    baseRate4: DEFAULT_RATE_4,
     // Daily pull tracking
     limitedPullsToday:  0,
     standardPullsToday: 0,
@@ -1358,6 +1363,8 @@ function initAudio() {
 // ── INIT ───────────────────────────────────────────────────
 function init() {
   gs = loadState();
+  BASE_RATE_5 = (gs.baseRate5 ?? DEFAULT_RATE_5) / 100;
+  BASE_RATE_4 = (gs.baseRate4 ?? DEFAULT_RATE_4) / 100;
 
   initStarfield();
   initParticleCanvas();
@@ -1371,6 +1378,8 @@ function init() {
   if (typeof initRealCollection === 'function') initRealCollection();
   initNoticeEvents();
   initPityControl();
+  initBaseRateControl();
+  updateFooterRatesHint();
   refreshBannerSelect();
 
   // Show initial screen
@@ -1512,6 +1521,95 @@ function initPityControl() {
   });
 
   if (window.i18n && window.i18n.applyTranslations) window.i18n.applyTranslations();
+}
+
+/**
+ * Injects manual base-rate controls (digit-only text inputs) into the
+ * settings modal, right before "Reset Data". Lets the player override
+ * BASE_RATE_5 / BASE_RATE_4 directly for testing/debugging purposes.
+ * Only whole, non-negative percentages (0-100) can be entered.
+ */
+function initBaseRateControl() {
+  const modal = document.getElementById('settings-modal');
+  const body  = modal && modal.querySelector('.settings-body');
+  if (!body || document.getElementById('gs-rates-section')) return;
+
+  const resetSection = document.getElementById('gs-reset-btn')?.closest('.settings-accordion');
+
+  const sectionHTML = `
+    <details class="settings-accordion" id="gs-rates-section">
+      <summary data-i18n="settings.rates">Base Rates</summary>
+      <div class="accordion-content">
+        <p class="settings-desc" data-i18n="settings.rates_desc">Manually set the base pull rates.</p>
+        <div class="slider-row">
+          <span class="pity-label" data-i18n="settings.rate5_label">5★ Rate</span>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="gs-rate5-input" class="rate-input" maxlength="3" value="${DEFAULT_RATE_5}">
+          <span class="rate-suffix">%</span>
+        </div>
+        <div class="slider-row pity-row-spaced">
+          <span class="pity-label" data-i18n="settings.rate4_label">4★ Rate</span>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" id="gs-rate4-input" class="rate-input" maxlength="3" value="${DEFAULT_RATE_4}">
+          <span class="rate-suffix">%</span>
+        </div>
+      </div>
+    </details>
+  `;
+
+  if (resetSection) {
+    resetSection.insertAdjacentHTML('beforebegin', sectionHTML);
+  } else {
+    body.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  const ALLOWED_KEYS = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter'];
+
+  const wireRateInput = (gsKey, inputId, applyRate) => {
+    const input = document.getElementById(inputId);
+    input.value = gs[gsKey];
+
+    // Block every keystroke that isn't a digit or a navigation/editing key —
+    // no '-', '.', 'e', etc. can ever reach the field.
+    input.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || ALLOWED_KEYS.includes(e.key)) return;
+      if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+    });
+
+    // Safety net for paste / drag-drop, which don't go through keydown.
+    input.addEventListener('input', () => {
+      const digits = input.value.replace(/\D/g, '');
+      if (digits === '') { input.value = ''; return; }
+      const val = Math.min(100, parseInt(digits, 10));
+      input.value = val;
+      gs[gsKey] = val;
+      saveState();
+      applyRate(val);
+    });
+
+    // Don't leave the field empty once the player clicks away.
+    input.addEventListener('blur', () => {
+      if (input.value === '') input.value = gs[gsKey] || 0;
+    });
+  };
+
+  wireRateInput('baseRate5', 'gs-rate5-input', (val) => { BASE_RATE_5 = val / 100; updateFooterRatesHint(); });
+  wireRateInput('baseRate4', 'gs-rate4-input', (val) => { BASE_RATE_4 = val / 100; updateFooterRatesHint(); });
+
+  window.addEventListener('languageChanged', updateFooterRatesHint);
+
+  if (window.i18n && window.i18n.applyTranslations) window.i18n.applyTranslations();
+}
+
+/**
+ * Renders the current base 5★/4★ rates next to the
+ * "5★ at 70 pity · 4★ every 10 pulls" footer hint.
+ */
+function updateFooterRatesHint() {
+  const el = document.getElementById('footer-rates-hint');
+  if (!el) return;
+  const template = window.i18n ? window.i18n.t('home.footer_rates') : '  ·  {r5}%/{r4}% base rates';
+  el.innerHTML = template
+    .replace('{r5}', gs.baseRate5 ?? DEFAULT_RATE_5)
+    .replace('{r4}', gs.baseRate4 ?? DEFAULT_RATE_4);
 }
 // --- ARCADE MINIGAME INTEGRATION MOVED ---
 

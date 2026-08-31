@@ -307,6 +307,10 @@
       .pity-step-btn { flex: 0 0 44px; width: auto; padding: 10px 4px; border-radius: 6px; background: rgba(255, 255, 255, 0.04); color: var(--txt, #ede4ff); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; transition: all 0.2s; cursor: pointer; }
       .pity-step-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); color: #fff; }
 
+      .rate-input { width: 56px; flex: 0 0 auto; padding: 8px 10px; border-radius: 6px; background: rgba(0, 0, 0, 0.3); color: var(--txt, #ede4ff); border: 1px solid rgba(201, 169, 110, 0.35); font-size: 14px; font-family: var(--font-m); text-align: center; font-variant-numeric: tabular-nums; outline: none; transition: border-color 0.2s; }
+      .rate-input:focus { border-color: var(--gold-lt, #e8cfa0); }
+      .rate-suffix { color: var(--txt-2, rgba(237, 228, 255, 0.58)); font-size: 13px; }
+
       .info-content { text-align: center; }
       .info-footer { padding: 0px 16px 16px 16px; }
       .info-copy { font-size: 10px; color: var(--txt-2, rgba(237, 228, 255, 0.58)); line-height: 1.4; margin-bottom: 16px; text-align: center; }
