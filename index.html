@@ -254,7 +254,7 @@
 
       <!-- Footer -->
       <footer class="select-footer">
-        <p class="footer-hint" data-i18n="home.footer_hint">5★ at 70 pity &nbsp;·&nbsp; 4★ every 10 pulls &nbsp;·&nbsp; 50/50 on limited</p>
+        <p class="footer-hint" data-i18n="home.footer_hint">5★ at 70 pity &nbsp;·&nbsp; 4★ every 10 pulls</p>
         <p class="footer-disclaimer" data-i18n="home.footer_disclaimer">Disclaimer: This is an unofficial, fan-made web application and is not affiliated with, endorsed, sponsored, or approved by Papergames or Infold Games. Love and Deepspace, its characters, artwork, audio, and all associated intellectual property are the exclusive property of their respective copyright holders. This project is created strictly for entertainment and fan purposes, with no commercial intent. No copyright infringement is intended.</p>
       </footer>
 
@@ -349,15 +349,6 @@
                 <div class="pity-soft-marker" title="Soft pity starts at pull 60"></div>
               </div>
               <span class="pity-soft-hint" data-i18n="pull.soft_pity_hint">↑ Soft pity at 60</span>
-            </div>
-
-            <div class="guarantee-zone" id="guarantee-zone" aria-live="polite"></div>
-
-            <div class="precise-wish-container" id="pw-container" style="display:none; text-align: center; margin-bottom: 4px; margin-top: -8px;">
-              <button class="pw-trigger-btn" id="pw-trigger-btn">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-                <span data-i18n="pw.btn">Precise Wish: </span><span id="pw-status-text">None</span>
-              </button>
             </div>
 
             <div class="pull-btns-row">
@@ -516,57 +507,6 @@
       <i data-lucide="pause" id="music-icon-pause" style="display:none;"></i>
     </button>
 
-    <!-- Precise Wish Modal -->
-    <div id="precise-wish-modal" class="settings-overlay" aria-modal="true" role="dialog" aria-hidden="true" style="display: none;">
-      <div class="settings-container">
-        <div class="settings-header">
-          <h2 class="pw-title" style="margin:0; font-family:var(--font-d); color:var(--gold-lt);" data-i18n="pw.title">PRECISE WISH</h2>
-          <button id="pw-close-btn" class="settings-close" aria-label="Close Precise Wish">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-          </button>
-        </div>
-        <div class="settings-body">
-          <p class="pw-desc" style="color:var(--txt-2); font-size:14px; margin-bottom:16px;" data-i18n="pw.desc">Select your target love interest. If your first 5-Star pull is not your chosen love interest, the next 5-Star is guaranteed to be your choice.</p>
-          
-          <div class="pw-status-bar">
-            <span><span data-i18n="pw.current_wish">Current Wish: </span><strong id="pw-current-wish">None</strong></span>
-            <span class="pw-points" id="pw-points-display">0/1</span>
-          </div>
-
-          <div class="pw-grid">
-            <button class="pw-char-btn" data-char="xavier">
-              <img src="assets/ui/select/xavier.webp" alt="Xavier">
-              <span data-i18n="char.xavier">Xavier</span>
-            </button>
-            <button class="pw-char-btn" data-char="zayne">
-              <img src="assets/ui/select/zayne.webp" alt="Zayne">
-              <span data-i18n="char.zayne">Zayne</span>
-            </button>
-            <button class="pw-char-btn" data-char="rafayel">
-              <img src="assets/ui/select/rafayel.webp" alt="Rafayel">
-              <span data-i18n="char.rafayel">Rafayel</span>
-            </button>
-            <button class="pw-char-btn" data-char="sylus">
-              <img src="assets/ui/select/sylus.webp" alt="Sylus">
-              <span data-i18n="char.sylus">Sylus</span>
-            </button>
-            <button class="pw-char-btn" data-char="caleb">
-              <img src="assets/ui/select/caleb.webp" alt="Caleb">
-              <span data-i18n="char.caleb">Caleb</span>
-            </button>
-            <button class="pw-char-btn" data-char="valko">
-              <img src="assets/ui/select/valko.webp" alt="Valko">
-              <span data-i18n="char.valko">Valko</span>
-            </button>
-          </div>
-
-          <div class="pw-footer" style="display:flex; justify-content:center; gap:12px; margin-top:24px;">
-            <button id="pw-cancel-choice-btn" class="pw-action-btn cancel" style="display:none; background:transparent; border:1px solid #555; color:#ddd; padding:8px 16px; border-radius:var(--r-sm); cursor:pointer;" data-i18n="pw.cancel">Cancel Wish</button>
-            <button id="pw-confirm-btn" class="pw-action-btn confirm" style="background:var(--gold-lt); color:#000; padding:8px 24px; border:none; border-radius:var(--r-sm); font-weight:600; cursor:pointer;" disabled data-i18n="pw.confirm">Confirm</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div><!-- /app -->
 
   <!-- Settings modal injected by global-settings.js?v=6 -->
@@ -636,8 +576,6 @@
       title: 'Gacha FAQ',
       items: [
         { q: 'How does the pity system work?', a: '5-stars are guaranteed within 70 pulls. 4-stars are guaranteed within 10 pulls. Your pity counter is shared across all pulls on the same banner.', i18n_q: 'faq.q1', i18n_a: 'faq.a1' },
-        { q: 'What is the 50/50 system?', a: 'On limited banners, you have a 50% chance of pulling the featured character. If you lose the 50/50, your next 5-star on that banner is guaranteed to be the featured character.', i18n_q: 'faq.q2', i18n_a: 'faq.a2' },
-        { q: 'What is Precise Wish?', a: 'Precise Wish lets you designate a target Love Interest. If you lose the 50/50, your next guaranteed 5-star will always be from your chosen Love Interest instead of a random one.', i18n_q: 'faq.q3', i18n_a: 'faq.a3' },
         { q: 'What are Deepspace Wish and Empyrean Wish tickets?', a: 'These are two different currency types. Deepspace Wishes are used for standard and limited banners, while Empyrean Wishes are used for the exclusive Empyrean banner. You can earn them from the Wishfall Frenzy arcade game.', i18n_q: 'faq.q4', i18n_a: 'faq.a4' },
         { q: 'How do I rank up memories?', a: 'Pulling duplicate cards automatically increases the rank (stars) of the memory. Higher ranks unlock additional bonuses.', i18n_q: 'faq.q5', i18n_a: 'faq.a5' },
         { q: 'How do I reset my data?', a: 'Open Settings → Reset Data → Confirm. This permanently deletes all pulls, pity, wishes, and your collection.', i18n_q: 'faq.q6', i18n_a: 'faq.a6' },
