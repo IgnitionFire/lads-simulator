@@ -83,6 +83,7 @@ const ALL_CHARS = Object.keys(CHARACTERS);
 // ── GACHA CONSTANTS ────────────────────────────────────────
 const LIMITED_FEATURED  = 'valko';
 const HARD_PITY         = 70;        // guaranteed 5★ at this pull count
+const HARD_PITY_4       = 10;        // guaranteed 4★+ at this pull count
 const SOFT_PITY_START   = 60;        // soft pity begins here
 const SOFT_PITY_RATE    = 0.085;     // extra rate added per pull in soft pity zone
 const BASE_RATE_5       = 0.01;      // 1% base 5★ rate
@@ -269,7 +270,7 @@ function get5StarRate(pity5) {
 function rollRarity(pity5, pity4) {
   // Hard pity guarantees
   if (pity5 >= HARD_PITY) return '5star';
-  if (pity4 >= 10)        return '4star';
+  if (pity4 >= HARD_PITY_4) return '4star';
 
   const roll  = Math.random();
   const rate5 = get5StarRate(pity5);
@@ -1369,6 +1370,7 @@ function init() {
   initCollection();
   if (typeof initRealCollection === 'function') initRealCollection();
   initNoticeEvents();
+  initPityControl();
   refreshBannerSelect();
 
   // Show initial screen
@@ -1416,6 +1418,84 @@ function initNoticeEvents() {
   noticeModal.addEventListener('click', (e) => {
     if (e.target === noticeModal) closeNoticeModal();
   });
+}
+
+/**
+ * Injects manual pity controls (slider + zero/max buttons) into the
+ * settings modal, right before "Reset Data". Lets the player set
+ * gs.limitedPity5 / gs.limitedPity4 directly for testing/debugging purposes.
+ */
+function initPityControl() {
+  const modal = document.getElementById('settings-modal');
+  const body  = modal && modal.querySelector('.settings-body');
+  if (!body || document.getElementById('gs-pity-section')) return;
+
+  const resetSection = document.getElementById('gs-reset-btn')?.closest('.settings-accordion');
+
+  const sectionHTML = `
+    <details class="settings-accordion" id="gs-pity-section">
+      <summary data-i18n="settings.pity">Pity</summary>
+      <div class="accordion-content">
+        <p class="settings-desc" data-i18n="settings.pity_desc">Manually set your pity counters.</p>
+        <div class="slider-row">
+          <span class="pity-label" data-i18n="settings.pity5_label">5★ Pity</span>
+          <input type="range" id="gs-pity5-slider" class="settings-slider" min="0" max="${HARD_PITY}" step="1" value="0">
+          <span id="gs-pity5-value" class="pity-value-display">0 / ${HARD_PITY}</span>
+        </div>
+        <div class="pity-btn-row">
+          <button type="button" id="gs-pity5-zero-btn" class="pity-action-btn" data-i18n="settings.pity_zero">Set to 0</button>
+          <button type="button" id="gs-pity5-max-btn" class="pity-action-btn" data-i18n="settings.pity_max">Set to Max</button>
+        </div>
+        <div class="slider-row pity-row-spaced">
+          <span class="pity-label" data-i18n="settings.pity4_label">4★ Pity</span>
+          <input type="range" id="gs-pity4-slider" class="settings-slider" min="0" max="${HARD_PITY_4}" step="1" value="0">
+          <span id="gs-pity4-value" class="pity-value-display">0 / ${HARD_PITY_4}</span>
+        </div>
+        <div class="pity-btn-row">
+          <button type="button" id="gs-pity4-zero-btn" class="pity-action-btn" data-i18n="settings.pity_zero">Set to 0</button>
+          <button type="button" id="gs-pity4-max-btn" class="pity-action-btn" data-i18n="settings.pity_max">Set to Max</button>
+        </div>
+      </div>
+    </details>
+  `;
+
+  if (resetSection) {
+    resetSection.insertAdjacentHTML('beforebegin', sectionHTML);
+  } else {
+    body.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  const wirePitySlider = (gsKey, max, sliderId, valueId, zeroBtnId, maxBtnId, onApply) => {
+    const slider  = document.getElementById(sliderId);
+    const valueEl = document.getElementById(valueId);
+
+    const syncDisplay = (val) => {
+      slider.value = val;
+      valueEl.textContent = `${val} / ${max}`;
+    };
+
+    const applyPity = (val) => {
+      gs[gsKey] = val;
+      saveState();
+      syncDisplay(val);
+      if (onApply) onApply(val);
+    };
+
+    syncDisplay(gs[gsKey] || 0);
+
+    slider.addEventListener('input', (e) => applyPity(parseInt(e.target.value, 10)));
+    document.getElementById(zeroBtnId).addEventListener('click', () => applyPity(0));
+    document.getElementById(maxBtnId).addEventListener('click', () => applyPity(max));
+  };
+
+  wirePitySlider('limitedPity5', HARD_PITY, 'gs-pity5-slider', 'gs-pity5-value', 'gs-pity5-zero-btn', 'gs-pity5-max-btn', (val) => {
+    refreshBannerSelect();
+    updatePityUI(val, true);
+  });
+
+  wirePitySlider('limitedPity4', HARD_PITY_4, 'gs-pity4-slider', 'gs-pity4-value', 'gs-pity4-zero-btn', 'gs-pity4-max-btn');
+
+  if (window.i18n && window.i18n.applyTranslations) window.i18n.applyTranslations();
 }
 // --- ARCADE MINIGAME INTEGRATION MOVED ---
 
