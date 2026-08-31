@@ -668,38 +668,6 @@ function initCollection() {
 }
 
 function updateCollectionNotification() {
-  if (typeof CARD_CATALOG === 'undefined' || !gs || !gs.collection) return;
-  let hasNotif = false;
-  for (const card of CARD_CATALOG) {
-    const isNew = gs.newCards && gs.newCards[card.cardName];
-    if (isNew) {
-      hasNotif = true;
-      break;
-    }
-    const count = gs.collection[card.cardName] || 0;
-    if (count > 0) {
-      const rank = (gs.ranks && gs.ranks[card.cardName]) || 0;
-      if (count > rank + 1 && rank < 3) {
-        hasNotif = true;
-        break;
-      }
-    }
-  }
-  
-  const btn = document.getElementById('collection-open-btn');
-  if (btn) {
-    let dot = btn.querySelector('.col-notif-dot');
-    if (hasNotif) {
-      if (!dot) {
-        dot = document.createElement('div');
-        dot.className = 'col-notif-dot';
-        btn.appendChild(dot);
-      }
-    } else {
-      if (dot) dot.remove();
-    }
-  }
-
   updateCharTabNotifications();
 }
 
