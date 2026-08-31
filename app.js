@@ -87,7 +87,6 @@ const SOFT_PITY_START   = 60;        // soft pity begins here
 const SOFT_PITY_RATE    = 0.085;     // extra rate added per pull in soft pity zone
 const BASE_RATE_5       = 0.01;      // 1% base 5★ rate
 const BASE_RATE_4       = 0.07;      // 7% base 4★ rate
-const MAX_DAILY_PULLS   = 250;       // per banner per day
 // --- AUDIO SFX ---
 let audioCtx = null;
 const sfxBuffers = {};
@@ -254,22 +253,6 @@ function saveState() {
       updateCollectionNotification(); 
     }
   } catch (_) { /* ignore */ }
-}
-
-/**
- * Check if 24 hours have passed since last reset.
- * If so, reset daily pull counts.
- */
-function checkDailyReset() {
-  const now = new Date();
-  const lastReset = gs.lastResetTime ? new Date(gs.lastResetTime) : null;
-
-  if (!lastReset || lastReset.toDateString() !== now.toDateString()) {
-    gs.limitedPullsToday   = 0;
-    gs.standardPullsToday  = 0;
-    gs.lastResetTime       = now.getTime();
-    saveState();
-  }
 }
 
 // ── GACHA ALGORITHM ────────────────────────────────────────
@@ -439,7 +422,6 @@ function performPulls(count, bannerType) {
 let gs;           // game state
 let currentActiveCard = null;
 let currentBanner = null;
-let countdownInterval = null;
 
 // Particle system
 let particles      = [];
@@ -784,11 +766,6 @@ function triggerFlash(opacity) {
 
 // ── UI: BANNER SELECT ──────────────────────────────────────
 function refreshBannerSelect() {
-  const lRem = MAX_DAILY_PULLS - gs.limitedPullsToday;
-  const sRem = MAX_DAILY_PULLS - gs.standardPullsToday;
-
-  document.getElementById('limited-pulls-display').innerHTML  = `<img src="assets/ui/deepspace-wish.webp" style="width: 14px; vertical-align: middle; margin-right: 4px;"> ${lRem}`;
-  document.getElementById('standard-pulls-display').innerHTML = `<img src="assets/ui/empyrean-wish.webp" style="width: 14px; vertical-align: middle; margin-right: 4px;"> ${sRem}`;
   document.getElementById('limited-pity-display').textContent   = `${70 - gs.limitedPity5}`;
   document.getElementById('standard-pity-display').textContent  = `${70 - gs.standardPity5}`;
 }
@@ -798,8 +775,6 @@ function setupPullScreen(bannerType) {
   currentBanner = bannerType;
   const isLim = bannerType === 'limited';
   const pity5  = isLim ? gs.limitedPity5      : gs.standardPity5;
-  const pullsToday = isLim ? gs.limitedPullsToday : gs.standardPullsToday;
-  const remaining  = MAX_DAILY_PULLS - pullsToday;
 
   // Toggle class for CSS overrides (button colours, pity bar colour)
   const screenEl = document.getElementById('screen-pull');
@@ -844,9 +819,6 @@ function setupPullScreen(bannerType) {
     : (window.i18n ? window.i18n.t('pull.empyrean_wishes') : 'Empyrean Wishes');
   wlbl.className   = `wish-type-label ${isLim ? 'lbl-gold' : 'lbl-blue'}`;
 
-  const remText = window.i18n ? window.i18n.t('pull.remaining') : 'remaining';
-  document.getElementById('wish-remaining-count').textContent = `${remaining} / ${MAX_DAILY_PULLS} ${remText}`;
-
   // Pity bar
   updatePityUI(pity5, isLim);
 
@@ -855,10 +827,6 @@ function setupPullScreen(bannerType) {
   if (gzone) {
     gzone.innerHTML = '';
   }
-
-  // Buttons
-  document.getElementById('pull-1-btn').disabled  = remaining < 1;
-  document.getElementById('pull-10-btn').disabled = remaining < 10;
 }
 
 function updatePityUI(pity5, isLim) {
@@ -876,35 +844,6 @@ function updatePityUI(pity5, isLim) {
 
   // Accessible progressbar value
   document.getElementById('pity-track-el').setAttribute('aria-valuenow', pity5);
-}
-
-// ── COUNTDOWN TIMER ────────────────────────────────────────
-function getNextMidnight() {
-  const d = new Date();
-  d.setHours(24, 0, 0, 0);
-  return d.getTime();
-}
-
-function startCountdown() {
-  function tick() {
-    const now  = Date.now();
-    const next = getNextMidnight();
-    const rem  = Math.max(0, next - now);
-
-    if (rem === 0) {
-      checkDailyReset();
-      refreshBannerSelect();
-    }
-
-    const h   = Math.floor(rem / 3_600_000);
-    const m   = Math.floor((rem % 3_600_000) / 60_000);
-    const s   = Math.floor((rem % 60_000)    / 1_000);
-    const fmt = n => String(n).padStart(2, '0');
-    document.getElementById('reset-countdown').textContent = `${fmt(h)}:${fmt(m)}:${fmt(s)}`;
-  }
-  tick();
-  if (countdownInterval) clearInterval(countdownInterval);
-  countdownInterval = setInterval(tick, 1000);
 }
 
 // ── CARD BUILDER ───────────────────────────────────────────
@@ -1333,8 +1272,6 @@ function initEvents() {
   // Pull x1
   document.getElementById('pull-1-btn').addEventListener('click', (e) => {
     e.currentTarget.blur();
-    const rem = getRemainingPulls();
-    if (rem < 1) { showToast('No pulls remaining today! Reset in ' + getCountdownStr()); return; }
     const results = performPulls(1, currentBanner);
     playPullStartVideo(results, (skipped) => {
       showReveal(results, skipped);
@@ -1344,11 +1281,6 @@ function initEvents() {
   // Pull ×10
   document.getElementById('pull-10-btn').addEventListener('click', (e) => {
     e.currentTarget.blur();
-    const rem = getRemainingPulls();
-    if (rem < 10) {
-      showToast(`Need 10 pulls — only ${rem} remaining today.`);
-      return;
-    }
     const results = performPulls(10, currentBanner);
     playPullStartVideo(results, (skipped) => {
       showReveal(results, skipped);
@@ -1463,22 +1395,6 @@ function initEvents() {
   document.getElementById('collect-btn').addEventListener('pointerup', handleCollectBtn);
 }
 
-// ── HELPERS ────────────────────────────────────────────────
-function getRemainingPulls() {
-  if (!currentBanner) return 0;
-  const used = currentBanner === 'limited' ? gs.limitedPullsToday : gs.standardPullsToday;
-  return MAX_DAILY_PULLS - used;
-}
-
-function getCountdownStr() {
-  const rem = Math.max(0, getNextMidnight() - Date.now());
-  const h   = Math.floor(rem / 3_600_000);
-  const m   = Math.floor((rem % 3_600_000) / 60_000);
-  const s   = Math.floor((rem % 60_000)    / 1_000);
-  const fmt = n => String(n).padStart(2, '0');
-  return `${fmt(h)}:${fmt(m)}:${fmt(s)}`;
-}
-
 function initAudio() {
   const bgMusic = document.getElementById('bg-music');
   const musicToggleBtn = document.getElementById('music-toggle');
@@ -1499,7 +1415,6 @@ function initAudio() {
 // ── INIT ───────────────────────────────────────────────────
 function init() {
   gs = loadState();
-  checkDailyReset();
 
   initStarfield();
   initParticleCanvas();
@@ -1514,8 +1429,7 @@ function init() {
   initPreciseWishEvents();
   initNoticeEvents();
   refreshBannerSelect();
-  startCountdown();
-  
+
   // Show initial screen
   showScreen('select');
   
