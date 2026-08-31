@@ -729,7 +729,6 @@ function triggerFlash(opacity) {
 // ── UI: BANNER SELECT ──────────────────────────────────────
 function refreshBannerSelect() {
   document.getElementById('limited-pity-display').textContent   = `${70 - gs.limitedPity5}`;
-  document.getElementById('standard-pity-display').textContent  = `${70 - gs.standardPity5}`;
 }
 
 // ── UI: PULL SCREEN ────────────────────────────────────────
@@ -1186,7 +1185,6 @@ function initEvents() {
     }
   };
   document.getElementById('banner-card-limited').addEventListener('click',  makeCardClick('limited'));
-  document.getElementById('banner-card-standard').addEventListener('click', makeCardClick('standard'));
 
   // Keyboard accessibility for banner cards
   document.querySelectorAll('.banner-card').forEach(card => {
@@ -1200,12 +1198,6 @@ function initEvents() {
     e.stopPropagation();
     currentBanner = 'limited';
     setupPullScreen('limited');
-    showScreen('pull');
-  });
-  document.getElementById('banner-card-standard').addEventListener('click', e => {
-    e.stopPropagation();
-    currentBanner = 'standard';
-    setupPullScreen('standard');
     showScreen('pull');
   });
 
