@@ -1444,6 +1444,8 @@ function initPityControl() {
         </div>
         <div class="pity-btn-row">
           <button type="button" id="gs-pity5-zero-btn" class="pity-action-btn" data-i18n="settings.pity_zero">Set to 0</button>
+          <button type="button" id="gs-pity5-minus-btn" class="pity-step-btn" aria-label="Decrease 5★ pity by 10">−10</button>
+          <button type="button" id="gs-pity5-plus-btn" class="pity-step-btn" aria-label="Increase 5★ pity by 10">+10</button>
           <button type="button" id="gs-pity5-max-btn" class="pity-action-btn" data-i18n="settings.pity_max">Set to Max</button>
         </div>
         <div class="slider-row pity-row-spaced">
@@ -1453,6 +1455,8 @@ function initPityControl() {
         </div>
         <div class="pity-btn-row">
           <button type="button" id="gs-pity4-zero-btn" class="pity-action-btn" data-i18n="settings.pity_zero">Set to 0</button>
+          <button type="button" id="gs-pity4-minus-btn" class="pity-step-btn" aria-label="Decrease 4★ pity by 1">−1</button>
+          <button type="button" id="gs-pity4-plus-btn" class="pity-step-btn" aria-label="Increase 4★ pity by 1">+1</button>
           <button type="button" id="gs-pity4-max-btn" class="pity-action-btn" data-i18n="settings.pity_max">Set to Max</button>
         </div>
       </div>
@@ -1465,7 +1469,8 @@ function initPityControl() {
     body.insertAdjacentHTML('beforeend', sectionHTML);
   }
 
-  const wirePitySlider = (gsKey, max, sliderId, valueId, zeroBtnId, maxBtnId, onApply) => {
+  const wirePitySlider = (gsKey, max, step, ids, onApply) => {
+    const { sliderId, valueId, zeroBtnId, maxBtnId, minusBtnId, plusBtnId } = ids;
     const slider  = document.getElementById(sliderId);
     const valueEl = document.getElementById(valueId);
 
@@ -1475,6 +1480,7 @@ function initPityControl() {
     };
 
     const applyPity = (val) => {
+      val = Math.min(max, Math.max(0, val));
       gs[gsKey] = val;
       saveState();
       syncDisplay(val);
@@ -1486,14 +1492,24 @@ function initPityControl() {
     slider.addEventListener('input', (e) => applyPity(parseInt(e.target.value, 10)));
     document.getElementById(zeroBtnId).addEventListener('click', () => applyPity(0));
     document.getElementById(maxBtnId).addEventListener('click', () => applyPity(max));
+    document.getElementById(minusBtnId).addEventListener('click', () => applyPity((gs[gsKey] || 0) - step));
+    document.getElementById(plusBtnId).addEventListener('click', () => applyPity((gs[gsKey] || 0) + step));
   };
 
-  wirePitySlider('limitedPity5', HARD_PITY, 'gs-pity5-slider', 'gs-pity5-value', 'gs-pity5-zero-btn', 'gs-pity5-max-btn', (val) => {
+  wirePitySlider('limitedPity5', HARD_PITY, 10, {
+    sliderId: 'gs-pity5-slider', valueId: 'gs-pity5-value',
+    zeroBtnId: 'gs-pity5-zero-btn', maxBtnId: 'gs-pity5-max-btn',
+    minusBtnId: 'gs-pity5-minus-btn', plusBtnId: 'gs-pity5-plus-btn',
+  }, (val) => {
     refreshBannerSelect();
     updatePityUI(val, true);
   });
 
-  wirePitySlider('limitedPity4', HARD_PITY_4, 'gs-pity4-slider', 'gs-pity4-value', 'gs-pity4-zero-btn', 'gs-pity4-max-btn');
+  wirePitySlider('limitedPity4', HARD_PITY_4, 1, {
+    sliderId: 'gs-pity4-slider', valueId: 'gs-pity4-value',
+    zeroBtnId: 'gs-pity4-zero-btn', maxBtnId: 'gs-pity4-max-btn',
+    minusBtnId: 'gs-pity4-minus-btn', plusBtnId: 'gs-pity4-plus-btn',
+  });
 
   if (window.i18n && window.i18n.applyTranslations) window.i18n.applyTranslations();
 }

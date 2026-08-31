@@ -304,6 +304,8 @@
       .pity-row-spaced { margin-top: 20px; }
       .pity-action-btn { flex: 1; width: auto; padding: 10px; border-radius: 6px; background: rgba(201, 169, 110, 0.08); color: var(--gold-lt, #e8cfa0); border: 1px solid rgba(201, 169, 110, 0.35); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.2s; cursor: pointer; }
       .pity-action-btn:hover { background: rgba(201, 169, 110, 0.18); box-shadow: 0 0 12px rgba(201, 169, 110, 0.25); }
+      .pity-step-btn { flex: 0 0 44px; width: auto; padding: 10px 4px; border-radius: 6px; background: rgba(255, 255, 255, 0.04); color: var(--txt, #ede4ff); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; transition: all 0.2s; cursor: pointer; }
+      .pity-step-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); color: #fff; }
 
       .info-content { text-align: center; }
       .info-footer { padding: 0px 16px 16px 16px; }
