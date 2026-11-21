@@ -1414,6 +1414,7 @@ function init() {
   initPityControl();
   initBaseRateControl();
   initPullFilterControl();
+  initResetPityButton();
   updateFooterRatesHint();
   refreshBannerSelect();
 
@@ -1762,6 +1763,33 @@ function initPullFilterControl() {
   render();
 
   if (window.i18n && window.i18n.applyTranslations) window.i18n.applyTranslations();
+}
+
+/**
+ * Landing-page shortcut: zeroes every pity counter (5★ and 4★). No confirmation
+ * on purpose, it is pressed often. Keeps the settings sliders in sync.
+ */
+function initResetPityButton() {
+  const btn = document.getElementById('reset-pity-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    gs.limitedPity5 = 0;  gs.limitedPity4 = 0;
+    gs.standardPity5 = 0; gs.standardPity4 = 0;
+    saveState();
+    refreshBannerSelect();
+
+    // Settings → Pity sliders (injected by initPityControl)
+    [['5', HARD_PITY], ['4', HARD_PITY_4]].forEach(([n, max]) => {
+      const slider = document.getElementById(`gs-pity${n}-slider`);
+      const label  = document.getElementById(`gs-pity${n}-value`);
+      if (slider) slider.value = 0;
+      if (label)  label.textContent = `0 / ${max}`;
+    });
+
+    const msg = window.i18n ? window.i18n.t('home.pity_reset') : 'home.pity_reset';
+    showToast(msg === 'home.pity_reset' ? 'Pity reset' : msg, 1500);
+  });
 }
 
 /**

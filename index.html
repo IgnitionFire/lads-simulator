@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Infant:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Rubik+Bubbles&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="style.css?v=37">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -220,6 +220,13 @@
         <p class="footer-hint"><span data-i18n="home.footer_hint">5★ at 70 pity &nbsp;·&nbsp; 4★ every 10 pulls</span><span id="footer-rates-hint"></span></p>
         <p class="footer-disclaimer" data-i18n="home.footer_disclaimer">Disclaimer: This is an unofficial, fan-made web application and is not affiliated with, endorsed, sponsored, or approved by Papergames or Infold Games. Love and Deepspace, its characters, artwork, audio, and all associated intellectual property are the exclusive property of their respective copyright holders. This project is created strictly for entertainment and fan purposes, with no commercial intent. No copyright infringement is intended.</p>
       </footer>
+
+      <!-- Discreet "reset pity" button (near-invisible until hovered/focused) -->
+      <button id="reset-pity-btn" class="reset-pity-btn" type="button" aria-label="Reset pity" title="Reset pity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+        </svg>
+      </button>
 
     </div><!-- /screen-select -->
 
@@ -533,7 +540,7 @@
   <script src="memories.js?v=24"></script>
   <script src="collection.js?v=23"></script>
   <script src="audio-bridge.js?v=4"></script>
-  <script src="app.js?v=39"></script>
+  <script src="app.js?v=40"></script>
   <script>
     window.PAGE_FAQ = {
       title: 'Gacha FAQ',
