@@ -43,7 +43,7 @@
   "settings.rate5_label": "5★ 概率",
   "settings.rate4_label": "4★ 概率",
   "settings.filter": "抽取范围",
-  "settings.filter_desc": "选择可以抽到的 5★ 和 4★ 角色。3★ 卡牌不受影响。",
+  "settings.filter_desc": "选择可以抽到的 5★ 和 4★ 角色。3★ 卡牌不受影响。每个选框下方：卡牌数量 · 抽到该角色 5★ / 4★ 的概率。",
   "settings.filter_save": "保存",
   "settings.filter_warn_5": "至少需要勾选一个 5★。",
   "settings.filter_warn_4": "至少需要勾选一个 4★。",

@@ -3274,7 +3274,10 @@ body:has(#screen-reveal.active) .sf-notice-btn {
 .filter-row { display: flex; align-items: center; gap: 14px; padding: 8px 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); }
 .filter-row:last-of-type { border-bottom: none; }
 .filter-char { flex: 1; font-size: 14px; font-weight: 600; color: var(--char-color, var(--txt, #ede4ff)); }
-.filter-check { display: inline-flex; align-items: center; gap: 6px; min-width: 56px; font-size: 14px; cursor: pointer; color: var(--txt, #ede4ff); user-select: none; }
+.filter-label { display: flex; flex-direction: column; gap: 1px; width: auto; }
+.filter-label b { font-weight: 600; }
+.filter-stat { font-size: 11px; color: var(--txt-2, rgba(237, 228, 255, 0.58)); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.filter-check { display: inline-flex; align-items: center; gap: 6px; min-width: 104px; font-size: 14px; cursor: pointer; color: var(--txt, #ede4ff); user-select: none; }
 .filter-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--gold-lt, #e8cfa0); cursor: pointer; }
 .filter-msg { min-height: 18px; margin: 12px 0 10px; font-size: 12px; line-height: 1.4; color: var(--txt-2, rgba(237, 228, 255, 0.58)); }
 .filter-msg.is-error { color: #ff8a8a; }

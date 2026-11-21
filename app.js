@@ -1650,8 +1650,8 @@ function initPullFilterControl() {
   const rowsHTML = ALL_CHARS.map(id => `
         <div class="filter-row" style="--char-color:${CHARACTERS[id].color}">
           <span class="filter-char" data-char="${id}">${CHARACTERS[id].name}</span>
-          <label class="filter-check"><input type="checkbox" data-char="${id}" data-star="five" checked><span>5★</span></label>
-          <label class="filter-check"><input type="checkbox" data-char="${id}" data-star="four" checked><span>4★</span></label>
+          <label class="filter-check"><input type="checkbox" data-char="${id}" data-star="five" checked><span class="filter-label"><b>5★</b><small class="filter-stat" data-char="${id}" data-star="five"></small></span></label>
+          <label class="filter-check"><input type="checkbox" data-char="${id}" data-star="four" checked><span class="filter-label"><b>4★</b><small class="filter-stat" data-char="${id}" data-star="four"></small></span></label>
         </div>`).join('');
 
   const sectionHTML = `
@@ -1685,10 +1685,32 @@ function initPullFilterControl() {
 
   let savedFlash = false; // show "Saved" until the next edit
 
+  // Number of cards in the catalog per character and rarity ("five"/"four").
+  // resolveCard() draws uniformly among eligible cards, so a character's share
+  // of a rarity is simply its card count / total ticked card count.
+  const cardCounts = {};
+  ALL_CHARS.forEach(id => { cardCounts[id] = { five: 0, four: 0 }; });
+  CARD_CATALOG.forEach(c => {
+    const key = PULL_FILTER_STAR_KEYS[c.rarityStr];
+    if (key && cardCounts[c.character]) cardCounts[c.character][key]++;
+  });
+
   const readDraft = () => {
     const draft = normalizePullFilter(null);
     boxes.forEach(b => { draft[b.dataset.char][b.dataset.star] = b.checked; });
     return draft;
+  };
+
+  // "12 · 16.67%" under each tick box; unticked boxes show 0.00%.
+  const renderStats = (draft) => {
+    const totals = { five: 0, four: 0 };
+    ALL_CHARS.forEach(id => ['five', 'four'].forEach(k => { if (draft[id][k]) totals[k] += cardCounts[id][k]; }));
+    section.querySelectorAll('.filter-stat').forEach(el => {
+      const { char, star } = el.dataset;
+      const n = cardCounts[char][star];
+      const pct = (draft[char][star] && totals[star] > 0) ? (n / totals[star]) * 100 : 0;
+      el.textContent = `${n} · ${pct.toFixed(2)}%`;
+    });
   };
 
   const writeBoxes = (filter) => {
@@ -1696,7 +1718,9 @@ function initPullFilterControl() {
   };
 
   const render = () => {
-    const problems = pullFilterProblems(readDraft());
+    const draft = readDraft();
+    renderStats(draft);
+    const problems = pullFilterProblems(draft);
     saveBtn.disabled = problems.length > 0;
     const lines = [];
     if (problems.includes('five')) lines.push(t('settings.filter_warn_5', 'Keep at least one 5★ ticked.'));

@@ -42,7 +42,7 @@
   "settings.rate5_label": "5★ Rate",
   "settings.rate4_label": "4★ Rate",
   "settings.filter": "Pull Pool",
-  "settings.filter_desc": "Choose which characters can be pulled at 5★ and 4★. 3★ cards are not affected.",
+  "settings.filter_desc": "Choose which characters can be pulled at 5★ and 4★. 3★ cards are not affected. Under each box: number of cards · chance that a 5★ / 4★ pull is from that character.",
   "settings.filter_save": "Save",
   "settings.filter_warn_5": "Keep at least one 5★ ticked.",
   "settings.filter_warn_4": "Keep at least one 4★ ticked.",
