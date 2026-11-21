@@ -984,7 +984,7 @@ function playPullStartVideo(results, onComplete) {
   container.classList.add('active');
 
   const hasFiveStar = results.some(r => r.rarity === '5star');
-  video.src = hasFiveStar ? 'assets/ui/animations/pull_start_gold.mp4?v=2' : 'assets/ui/animations/pull_start.mp4';
+  video.src = hasFiveStar ? 'assets/ui/animations/pull_start_gold_lowbw.mp4' : 'assets/ui/animations/pull_start.mp4';
   video.muted = true;
   video.load();
 
